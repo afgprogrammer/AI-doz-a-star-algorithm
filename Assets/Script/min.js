@@ -104,18 +104,18 @@ for(let i=1;i<=3;i++) {
 }
 
 let child_click = (ev) => {
+    if (ev.target.getAttribute('data-cpu')) {
+        return
+    }
+
     let elem = ev.target.getAttribute('id')
+    ev.target.setAttribute('data-user', elem)
+
     click.push(elem)
     
     if (click.length <= 3) {
         // if find match to win
-        if (match.length > 0) {
-            if (click.length >= 1 && click.length <= 2) {
-                for(m of match) {
-                    document.getElementById(m[1]).style.background = '#eee'
-                    document.getElementById(m[2]).style.background = '#eee'
-                }
-            }
+        if (match.length > 0 && false) {
             match.filter((index) => {
                 let ig = index.find((els, index) => {
                     return els === elem && index === 1
@@ -125,10 +125,6 @@ let child_click = (ev) => {
                     
                     if (click.length >= 3)
                         return;
-
-                    for(m of match2) {
-                        document.getElementById(m[2]).style.background = 'green'
-                    }
                 }
             })
         } else {
@@ -139,15 +135,45 @@ let child_click = (ev) => {
                 })
                 if (ig && typeof ig !== 'undefined') {
                     match.push(index)
-                    for(m of match) {
-                        document.getElementById(m[1]).style.background = 'green'
-                        document.getElementById(m[2]).style.background = 'green'
-                    }
                 }
             })
         }
+
+        defend(match, click)
         ev.target.style.background = 'blue'
         checkWin(click);
+    }
+}
+
+// check defend path
+let defend = (match, click) => {
+    match = match.filter((va, index) => {
+        if (click.length < 2) 
+            return va
+
+        return (va[1] === click[1]) ? va : null
+    })
+
+    CPU(match)
+}
+
+// defend cpu
+let CPU = (ma) => {
+    if (ma instanceof Array) {
+        for (let m of ma) {
+            if (CPU(m)) {
+                return true
+            }
+        }
+    } else {
+        let el = document.getElementById(ma)
+        if (el.getAttribute('data-user') || el.getAttribute('data-cpu')) {
+            return false
+        } else {
+            el.style.background = 'red'
+            el.setAttribute('data-cpu', ma)
+            return true
+        }
     }
 }
 
